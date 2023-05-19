@@ -18,15 +18,6 @@ class SecullumDB:
             print(f"Erro ao tentar acessar o SQL Server: {err}")
             return con
     
-    def search_people_by_register(self, register: str):
-        con = self.connection()
-        cur = con.cursor()
-        rows = cur.execute(f"SELECT * FROM pessoas WHERE pessoas.n_identificador = '{register}'").fetchall()
-        print(rows[0])
-        cur.close()
-        del cur
-        con.close()
-    
     def get_access_today_detail(self, local: str):
         '''
             Retorna todos os acessos na data de hoje  conforme parâmetros type_access:
@@ -41,7 +32,7 @@ class SecullumDB:
                     SELECT a.id,
                            a.data,
                            dbo.fn_hora_segundos(a.hora) hora,
-                           p.n_identificador,
+                           p.n_folha,
                            p.nome,
                            CASE a.tipo_acesso
                             WHEN 0 THEN 'R'
@@ -126,7 +117,7 @@ class SecullumDB:
         cur = con.cursor()
         rows = cur.execute(f'''  
                     SELECT p.id,
-                           p.n_identificador,
+                           p.n_folha,
                            p.nome,
                            c.descricao,
                            foo.descricao

@@ -18,12 +18,13 @@ password = 'totalseg_1'
 
 con = pyodbc.connect('DRIVER={SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
 
-url = 'http://10.58.64.202:7932/CalcompDataEmployees/Secullum-Export-txt/file'
+url = 'http://10.58.64.202:7932/CalcompDataEmployees/all'
 
 date = datetime.datetime.now()
 date = date.strftime("%Y%m%d")
 token_str = f"ACCESS-FACEID-{date}"
 token = hashlib.sha256(token_str.encode()).hexdigest()
+print(f"Token: {token}")
 
 headers = {'token': token}
 
@@ -32,20 +33,24 @@ try:
 except Exception as err:
     print(f"Error on request employees: {err}")
 
-text = response.text
-length = len(text.split('\n'))
+data = response.json()
 
-for i, data in enumerate(text.split('\n')):
-    if((i == 0) or (i == (length - 1))):
-        continue
-    n_identificador = data.split('\t')[0]
-    nome = data.split('\t')[1]
-    cnpj = data.split('\t')[2]
-    classificacao = data.split('\t')[3]
+for func in data:
+    rA_CRACHA = func['rA_CRACHA']
+    rA_MAT = func['rA_MAT']
     
     cur = con.cursor()
-    cur.execute(f"SELECT * FROM pessoas WHERE pessoas.n_identificador = '{n_identificador}'")
+    cur.execute(f"SELECT pessoas.id, pessoas.nome FROM pessoas WHERE pessoas.n_identificador = '{rA_MAT}'")
     row = cur.fetchmany()
     cur.close()
-    if(len(row) < 1):
-        print(f"Funcionário não encontrado: {n_identificador}")
+    if(len(row) > 0):
+        pessoa_id = row[0].id
+        cur = con.cursor()
+        cur.execute(f'''
+                    UPDATE pessoas
+                    SET n_folha = '{rA_CRACHA}'
+                    WHERE id = {pessoa_id}
+                    ''')
+        con.commit()
+        cur.close()
+        print(f"Atualizado: {rA_CRACHA} - {row[0].nome}")
