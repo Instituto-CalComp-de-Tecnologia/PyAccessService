@@ -59,11 +59,15 @@ for i, data in enumerate(text.split('\n')):
     row = cur.fetchmany()
     cur.close()
     if(len(row) < 1):
-        # cur = con.cursor()
-        # cur.execute(f"INSERT INTO pessoas(n_identificador, nome, empresa_id, horario_id, estado, classificacao_id, nivel_id, sem_digital, criacao_usu_id, criacao_data) VALUES('{n_identificador}', '{nome}', {EMPRESAS[cnpj]}, 1, 2, 2, 1, 0, 2, GETDATE())")
-        # con.commit()
-        # cur.close()
-        print(f"INSERIDO: {n_identificador} - {nome} - {cnpj} ({EMPRESAS[cnpj]}) - {classificacao}")
+        print(f"INSERT INTO pessoas(n_identificador, nome, empresa_id, horario_id, estado, classificacao_id, nivel_id, sem_digital, criacao_usu_id, criacao_data) VALUES('{n_identificador}', '{nome}', {EMPRESAS[cnpj]}, 1, 2, 2, 1, 0, 2, GETDATE())")
+        try:   
+            cur = con.cursor()
+            cur.execute(f"INSERT INTO pessoas(n_identificador, nome, empresa_id, horario_id, estado, classificacao_id, nivel_id, sem_digital, criacao_usu_id, criacao_data) VALUES('{n_identificador}', '{nome}', {EMPRESAS[cnpj]}, 1, 2, 2, 1, 0, 2, GETDATE())")
+            con.commit()
+            cur.close()
+            print(f"INSERIDO: {n_identificador} - {nome} - {cnpj} ({EMPRESAS[cnpj]}) - {classificacao}")
+        except Exception as err:
+            print(f"Erro ao inserir novo funcionário {n_identificador}: {str(err)}")
 # --------------------------------------------------- -------------------------------------------------------------------------------
 
 # ATUAIZAÇÃO DE DEMAIS DADOS --------------------------------------------------------------------------------------------------------
@@ -87,20 +91,22 @@ data = response.json()
 for func in data:
     rA_CRACHA = func['rA_CRACHA']
     rA_MAT = func['rA_MAT']
-    
     cur = con.cursor()
     cur.execute(f"SELECT pessoas.id, pessoas.nome FROM pessoas WHERE pessoas.n_identificador = '{rA_MAT}' AND n_folha IS NULL")
     row = cur.fetchmany()
     cur.close()
-    # if(len(row) > 0):
-    #     pessoa_id = row[0].id
-    #     cur = con.cursor()
-    #     cur.execute(f'''
-    #                 UPDATE pessoas
-    #                 SET n_folha = '{rA_CRACHA}'
-    #                 WHERE id = {pessoa_id}
-    #                 ''')
-    #     con.commit()
-    #     cur.close()
-    #     print(f"Atualizado: {rA_CRACHA} - {row[0].nome}")
+    if(len(row) > 0):
+        try:
+            pessoa_id = row[0].id
+            cur = con.cursor()
+            cur.execute(f'''
+                        UPDATE pessoas
+                        SET n_folha = '{rA_CRACHA}'
+                        WHERE id = {pessoa_id}
+                        ''')
+            con.commit()
+            cur.close()
+            print(f"Atualizado: {rA_CRACHA} - {row[0].nome}")
+        except Exception as err:
+            print(f"Erro ao atualizar funcionário: {str(err)}")
 # --------------------------------------------------- -------------------------------------------------------------------------------
