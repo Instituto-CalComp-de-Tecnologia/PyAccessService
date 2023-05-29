@@ -18,6 +18,29 @@ password = 'totalseg_1'
 
 con = pyodbc.connect('DRIVER={SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password)
 
+def create_cost_center(desc: str):
+    cur = con.cursor()
+    cur.execute(f'''
+                INSERT INTO filtro2(descricao)
+                VALUES('{desc}')
+                 ''')
+    con.commit()
+    cur.close()
+    return find_cost_center_by_desc(desc=desc)
+
+def find_cost_center_by_desc(desc: str):
+    cur = con.cursor()
+    row = cur.execute(f'''
+                       SELECT id
+                       FROM filtro2
+                       WHERE descricao = '{desc}'
+                    ''').fetchone()
+    cur.close()
+    if(not row == None):
+        return row.id
+    else:
+        return create_cost_center(desc=desc)
+
 # ATUAIZAÇÃO DE DEMAIS DADOS --------------------------------------------------------------------------------------------------------
 url = 'http://10.58.64.202:7932/CalcompDataEmployees/all'
 
@@ -36,25 +59,47 @@ except Exception as err:
 
 data = response.json()
 
+f = open('CENTRO_CUSTO_SEM_DESCRICAO.txt', 'w')
+ccs = []
+
 for func in data:
+    name = func['name']
     rA_CRACHA = func['rA_CRACHA']
     rA_MAT = func['rA_MAT']
+    rA_CC = func['rA_CC']
+    cC_DESC = func['cC_DESC']
+    
+    cC_id = None
+    if(not cC_DESC == None):
+        cC_id = find_cost_center_by_desc(cC_DESC)
     cur = con.cursor()
-    cur.execute(f"SELECT pessoas.id, pessoas.nome, pessoas.n_folha FROM pessoas WHERE pessoas.n_identificador = '{rA_MAT}' AND (pessoas.n_folha IS NULL OR pessoas.n_folha = '')")
+    cur.execute(f"SELECT pessoas.id, pessoas.nome, pessoas.n_folha FROM pessoas WHERE pessoas.n_identificador = '{rA_MAT}'")
     row = cur.fetchmany()
     cur.close()
     if(len(row) > 0):
         try:
             pessoa_id = row[0].id
             cur = con.cursor()
-            cur.execute(f'''
-                        UPDATE pessoas
-                           SET n_folha = '{rA_CRACHA}'
-                         WHERE id = {pessoa_id}
-                        ''')
-            con.commit()
-            cur.close()
+            if(not cC_id == None):
+                cur.execute(f'''
+                            UPDATE pessoas
+                            SET n_folha = '{rA_CRACHA}',
+                                filtro2_id = {cC_id}
+                            WHERE id = {pessoa_id}
+                            ''')
+                con.commit()
+                cur.close()
+            else:
+                cur.execute(f'''
+                            UPDATE pessoas
+                            SET n_folha = '{rA_CRACHA}',
+                                filtro2_id = NULL
+                            WHERE id = {pessoa_id}
+                            ''')
+                con.commit()
+                cur.close()
             print(f"Atualizado: {rA_CRACHA} - {row[0].nome}")
         except Exception as err:
             print(f"Erro ao atualizar funcionário: {str(err)}")
+f.close()
 # --------------------------------------------------- -------------------------------------------------------------------------------
