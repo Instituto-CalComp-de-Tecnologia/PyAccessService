@@ -9,7 +9,7 @@ access_service = AccessService()
 
 @app.route("/getaccess/<local>", methods=['GET'])
 @cross_origin()
-def hefind_total_acess_today_detail(local: str):
+def find_total_acess_today_detail(local: str):
     try:
         data = access_service.find_total_acess_today_detail(local=local)
         return {

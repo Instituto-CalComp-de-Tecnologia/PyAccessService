@@ -25,7 +25,8 @@ class AccessService:
                     'name': row[4],
                     'register': row[3],
                     'equipament': row[6],
-                    'orientarion': row[5]
+                    'orientarion': row[5],
+                    'department': row[9]
                 })
                 
                 if(row[5] == 'E'):
@@ -39,7 +40,8 @@ class AccessService:
                     'name': row[4],
                     'register': row[3],
                     'equipament': row[6],
-                    'orientarion': row[5]
+                    'orientarion': row[5],
+                    'department': row[9]
                 })
                 if(row[5] == 'E'):
                     data_return[row[8]]['total_e'] += 1
@@ -61,7 +63,8 @@ class AccessService:
             data_return['access'].append({
                 'register': row[1],
                 'name': row[2],
-                'classification': row[3]
+                'classification': row[3],
+                'department': row[5]
             })
             
             if(row[3] not in data_return):

@@ -41,7 +41,8 @@ class SecullumDB:
                            END AS tipo_acessos,
                            e.descricao,
                            b.descricao,
-                           c.descricao
+                           c.descricao,
+                           f.descricao
                     FROM eventos_acessos a
                     INNER JOIN pessoas p
                         ON a.pessoa_id = p.id
@@ -51,6 +52,8 @@ class SecullumDB:
                         ON a.equipamento_id = e.id
                     LEFT JOIN ambientes b
                         ON e.ambiente_id = b.id
+                    LEFT JOIN filtro2 f
+                        ON p.filtro2_id = f.id
                     WHERE a.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
                     AND b.descricao = '{local}'
                     AND a.confirmado = 1
@@ -120,7 +123,8 @@ class SecullumDB:
                            p.n_folha,
                            p.nome,
                            c.descricao,
-                           foo.descricao
+                           foo.descricao,
+                           f.descricao
                     FROM pessoas p
                     INNER JOIN (
                                 SELECT ea.pessoa_id,
@@ -145,6 +149,8 @@ class SecullumDB:
                         ON p.id = foo.pessoa_id
                     INNER JOIN classificacoes c
                         ON c.id = p.classificacao_id
+                    LEFT JOIN filtro2 f
+                        ON p.filtro2_id = f.id
                     WHERE foo.descricao = '{local}'
                     ORDER BY p.nome;
                     ''').fetchall()
