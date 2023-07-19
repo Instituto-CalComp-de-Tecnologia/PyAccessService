@@ -1,17 +1,15 @@
 import pyodbc
 
-server = '10.58.65.21'
-database = 'SecullumAcesso'
-username = 'sa'
-password = 'totalseg_1'
-
-class SecullumDB:
-    def __init__(self) -> None:
-        pass
+class AccessDTO:
+    def __init__(self, config) -> None:
+        self.server = config["server"]
+        self.database = config["database"]
+        self.username = config["username"]
+        self.password = config["password"]
     
     def connection(self):
         try:
-            con = pyodbc.connect('DRIVER={SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID=' + username + ';PWD=' + password + ";MARS_Connection=yes;MultipleActiveResultSets=True;")
+            con = pyodbc.connect('DRIVER={SQL Server};SERVER=' + self.server + ';DATABASE=' + self.database + ';UID=' + self.username + ';PWD=' + self.password + ";MARS_Connection=yes;MultipleActiveResultSets=True;")
             return con
         except Exception as err:
             con = None
@@ -186,6 +184,6 @@ class SecullumDB:
         return rows
 
 if __name__ == '__main__':
-    s = SecullumDB()
+    s = AccessDTO()
     # s.get_access_today('RECEPCAO')
     s.get_total_access_by_local_today()

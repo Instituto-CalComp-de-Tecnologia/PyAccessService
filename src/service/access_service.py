@@ -1,8 +1,8 @@
-from database.dto import SecullumDB
+from database.access_dto import AccessDTO
 
 class AccessService:
-    def __init__(self) -> None:
-        self.db = SecullumDB()
+    def __init__(self, config) -> None:
+        self.db = AccessDTO(config)
     
     def find_total_acess_today_detail(self, local: str):
         access_rows = self.db.get_access_today_detail(local=local)
