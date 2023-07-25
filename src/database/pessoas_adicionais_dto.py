@@ -40,6 +40,119 @@ class PessoasAdicionaisDTO:
             return rows
         except Exception as err:
             print(f"Error on login user: {err}")
+    
+    def update_departamento(self, pessoa_id, id_departamento):
+        con = self.connection()
+        cur = con.cursor()
+        
+        try:
+            cur.execute(f'''
+                        UPDATE pessoas
+                        SET filtro2_id = {id_departamento}
+                        WHERE id = {pessoa_id};
+                        ''')
+            con.commit()
+            
+            cur.close()
+            del cur
+            con.close()
+            return {
+                'status': True,
+                'message': 'Departamento successfully updated.',
+                'data': []
+            }
+        except Exception as err:
+            print(f"Error on insert user: {err}")
+            cur.close()
+            del cur
+            con.close()
+            return {
+                'status': False,
+                'message': f'Error on update departamento: {str(err)}',
+                'data': []
+            }
+    
+    def update_line(self, pessoa_id, line):
+        p = self.find_by_id(pessoa_id=pessoa_id)
+        con = self.connection()
+        cur = con.cursor()
+        
+        if(len(p) > 0):
+            try:
+                cur.execute(f'''
+                            UPDATE pessoas_adicionais
+                            SET line = {line}
+                            WHERE pessoa_id = {pessoa_id};
+                            ''')
+                con.commit()
+                
+                cur.close()
+                del cur
+                con.close()
+                return {
+                    'status': True,
+                    'message': 'Line successfully updated.',
+                    'data': []
+                }
+            except Exception as err:
+                print(f"Error on insert user: {err}")
+                cur.close()
+                del cur
+                con.close()
+                return {
+                    'status': False,
+                    'message': f'Error on update line: {str(err)}',
+                    'data': []
+                }
+        else:
+            try:
+                cur.execute(f'''
+                            INSERT INTO pessoas_adicionais(pessoa_id, line)
+                            VALUES({pessoa_id}, {line});
+                            ''')
+                con.commit()
+                
+                cur.close()
+                del cur
+                con.close()
+                return {
+                    'status': True,
+                    'message': 'Line successfully updated.',
+                    'data': []
+                }
+            except Exception as err:
+                print(f"Error on insert user: {err}")
+                cur.close()
+                del cur
+                con.close()
+                return {
+                    'status': False,
+                    'message': f'Error on update line: {str(err)}',
+                    'data': []
+                }
+    
+    def find_by_id(self, pessoa_id):
+        con = self.connection()
+        cur = con.cursor()
+        
+        try:
+            rows = cur.execute(f'''
+                        SELECT pessoa_id
+                        FROM pessoas_adicionais
+                        WHERE pessoa_id = {pessoa_id};
+                           ''').fetchall()
+            
+            
+            cur.close()
+            del cur
+            con.close()
+            return rows
+        except Exception as err:
+            print(f"Error on find Pessoa adicional: {err}")
+            cur.close()
+            del cur
+            con.close()
+            return []
 
 if __name__ == '__main__':
     config = {
@@ -49,4 +162,4 @@ if __name__ == '__main__':
         "password": "totalseg_1"
     }
     p = PessoasAdicionaisDTO(config=config)
-    p.get_all()
+    print(p.update_line(1614, 2))

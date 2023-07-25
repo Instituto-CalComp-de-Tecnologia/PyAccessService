@@ -4,6 +4,7 @@ from flask_cors import CORS, cross_origin
 from service.access_service import AccessService
 from service.user_service import UserService
 from service.pessoas_adicionais_service import PessoasAdicionaisService
+from service.departamento_service import DepartamentoService
 import json
 
 # LEITURA DAS CONFIGURAÇÕES
@@ -18,6 +19,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 access_service = AccessService(config)
 user_service = UserService(config)
 pessoas_service = PessoasAdicionaisService(config)
+departamento_service = DepartamentoService(config)
 
 # ROTAS ACCESS ------------------------------------------------------------------------------
 @app.route("/getaccess/<local>", methods=['GET'])
@@ -117,10 +119,51 @@ def pessoas_get_all():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on create user: ' + err,
+            'message': 'Error on list pessoas: ' + err,
+            'data': []
+        }
+
+@app.route("/pessoas/update", methods=['GET'])
+@cross_origin()
+def pessoas_update():
+    try:
+        pessoa_id = request.json["pessoa_id"]
+        id_departamento = request.json["id_departamento"]
+        line = request.json["line"]
+        
+        data = pessoas_service.update_pessoa(pessoa_id=pessoa_id, id_departamento=id_departamento, line=line)
+        return {
+            'status': True,
+            'message': 'Pessoas successfully updated.',
+            'data': []
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error on list pessoas: ' + err,
+            'data': []
+        }
+# -------------------------------------------------------------------------------------------------------
+
+# ROTAS DEPARTAMENTOS  ------------------------------------------------------------------------------
+@app.route("/departamento/getall", methods=['GET'])
+@cross_origin()
+def departamento_get_all():
+    try:
+        data = departamento_service.get_all()
+        return {
+            'status': True,
+            'message': 'Departamento successfully listed.',
+            'data': data
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error on list departamento: ' + err,
             'data': []
         }
 # -------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
+    # print(departamento_service.get_all())

@@ -1,4 +1,5 @@
 from database.pessoas_adicionais_dto import PessoasAdicionaisDTO
+import copy
 
 class PessoasAdicionaisService:
     def __init__(self, config) -> None:
@@ -14,5 +15,24 @@ class PessoasAdicionaisService:
             data['nome'] = person.nome
             data['line'] = person.line
             data['departamento'] = person.departamento
-            data_return.append(data)
+            data_return.append(copy.copy(data))
         return data_return
+    
+    def update_pessoa(self, pessoa_id, id_departamento, line):
+        try:
+            if(id_departamento):
+                self.pessoasAdicionaisDTO.update_departamento(pessoa_id=pessoa_id, id_departamento=id_departamento)
+            if(line):
+                self.pessoasAdicionaisDTO.update_line(pessoa_id=pessoa_id, line=line)
+            
+            return {
+                'status': False,
+                'message': f'Pessoa updated successfully.',
+                'data': []
+            }
+        except Exception as err:
+            return {
+                'status': False,
+                'message': f'Error on update pessoa: {str(err)}',
+                'data': []
+            }
