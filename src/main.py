@@ -123,7 +123,7 @@ def pessoas_get_all():
             'data': []
         }
 
-@app.route("/pessoas/update", methods=['GET'])
+@app.route("/pessoas/update", methods=['POST'])
 @cross_origin()
 def pessoas_update():
     try:
