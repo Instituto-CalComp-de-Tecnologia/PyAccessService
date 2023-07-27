@@ -9,3 +9,8 @@ CREATE TABLE SecullumAcesso.dbo.pessoas_adicionais (
 	pessoa_id int NOT NULL,
 	line int NULL
 );
+
+CREATE TABLE SecullumAcesso.dbo.lines (
+	id int IDENTITY(0,1) NOT NULL,
+	desc_line varchar(150) NULL
+);

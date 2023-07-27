@@ -25,14 +25,16 @@ class PessoasAdicionaisDTO:
                                SELECT p.id,
                                       p.n_folha,
                                       p.nome,
-                                      pa.line,
+                                      (l.desc_line) line,
                                       (f.descricao) AS departamento
-                               FROM pessoas p
-                               LEFT JOIN pessoas_adicionais pa
-                                   ON p.id = pa.pessoa_id
-                               INNER JOIN filtro2 f
-                                   ON P.filtro2_id = f.id
-                               ORDER BY p.nome;
+                                FROM pessoas p
+                                LEFT JOIN pessoas_adicionais pa
+                                    ON p.id = pa.pessoa_id
+                                LEFT JOIN lines l
+                                    ON l.id = pa.line
+                                INNER JOIN filtro2 f
+                                    ON P.filtro2_id = f.id
+                                ORDER BY p.nome;
                                ''').fetchall()
             cur.close()
             del cur
@@ -72,7 +74,7 @@ class PessoasAdicionaisDTO:
                 'data': []
             }
     
-    def update_line(self, pessoa_id, line):
+    def update_line(self, pessoa_id, id_line):
         p = self.find_by_id(pessoa_id=pessoa_id)
         con = self.connection()
         cur = con.cursor()
@@ -81,7 +83,7 @@ class PessoasAdicionaisDTO:
             try:
                 cur.execute(f'''
                             UPDATE pessoas_adicionais
-                            SET line = {line}
+                            SET line = {id_line}
                             WHERE pessoa_id = {pessoa_id};
                             ''')
                 con.commit()
@@ -108,7 +110,7 @@ class PessoasAdicionaisDTO:
             try:
                 cur.execute(f'''
                             INSERT INTO pessoas_adicionais(pessoa_id, line)
-                            VALUES({pessoa_id}, {line});
+                            VALUES({pessoa_id}, {id_line});
                             ''')
                 con.commit()
                 

@@ -5,6 +5,7 @@ from service.access_service import AccessService
 from service.user_service import UserService
 from service.pessoas_adicionais_service import PessoasAdicionaisService
 from service.departamento_service import DepartamentoService
+from service.lines_service import LinesService
 import json
 
 # LEITURA DAS CONFIGURAÇÕES
@@ -20,6 +21,7 @@ access_service = AccessService(config)
 user_service = UserService(config)
 pessoas_service = PessoasAdicionaisService(config)
 departamento_service = DepartamentoService(config)
+lines_service = LinesService(config)
 
 # ROTAS ACCESS ------------------------------------------------------------------------------
 @app.route("/getaccess/<local>", methods=['GET'])
@@ -35,7 +37,7 @@ def find_total_acess_today_detail(local: str):
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on list access: ' + err,
+            'message': 'Error on list access: ' + str(err),
             'data': []
         }
 
@@ -52,7 +54,7 @@ def get_total_access_by_local_today():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on list access: ' + err,
+            'message': 'Error on list access: ' + str(err),
             'data': []
         }
 
@@ -69,7 +71,7 @@ def get_present_people_by_local(local: str):
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on list access: ' + err,
+            'message': 'Error on list access: ' + str(err),
             'data': []
         }
 # -----------------------------------------------------------------------------------------
@@ -85,7 +87,7 @@ def login_user():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error login user: ' + err,
+            'message': 'Error login user: ' + str(err),
             'data': []
         }
 
@@ -100,7 +102,7 @@ def create_user():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on create user: ' + err,
+            'message': 'Error on create user: ' + str(err),
             'data': []
         }
 # --------------------------------------------------------------------------------------------------------
@@ -119,7 +121,7 @@ def pessoas_get_all():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on list pessoas: ' + err,
+            'message': 'Error on list pessoas: ' + str(err),
             'data': []
         }
 
@@ -129,9 +131,9 @@ def pessoas_update():
     try:
         pessoa_id = request.json["pessoa_id"]
         id_departamento = request.json["id_departamento"]
-        line = request.json["line"]
+        id_line = request.json["id_line"]
         
-        data = pessoas_service.update_pessoa(pessoa_id=pessoa_id, id_departamento=id_departamento, line=line)
+        data = pessoas_service.update_pessoa(pessoa_id=pessoa_id, id_departamento=id_departamento, id_line=id_line)
         return {
             'status': True,
             'message': 'Pessoas successfully updated.',
@@ -140,7 +142,7 @@ def pessoas_update():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on list pessoas: ' + err,
+            'message': 'Error on list pessoas: ' + str(err),
             'data': []
         }
 # -------------------------------------------------------------------------------------------------------
@@ -159,11 +161,29 @@ def departamento_get_all():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error on list departamento: ' + err,
+            'message': 'Error on list departamento: ' + str(err),
+            'data': []
+        }
+# -------------------------------------------------------------------------------------------------------
+
+# ROTAS LINES  ------------------------------------------------------------------------------
+@app.route("/lines/getall", methods=['GET'])
+@cross_origin()
+def lines_get_all():
+    try:
+        data = lines_service.get_all()
+        return {
+            'status': True,
+            'message': 'Lines successfully listed.',
+            'data': data
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error on list Lines: ' + str(err),
             'data': []
         }
 # -------------------------------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-    # print(departamento_service.get_all())
