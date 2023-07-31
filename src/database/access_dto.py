@@ -157,6 +157,50 @@ class AccessDTO:
         con.close()
         return rows
     
+    def get_absents(self, id_departamento, id_line):
+        con = self.connection()
+        cur = con.cursor()
+        where = ''
+        
+        if((id_departamento != None) and (id_line != None)):
+            where = f'''WHERE f.id = {id_departamento}
+                          AND l.id = {id_line}'''
+        elif((id_departamento != None) and (id_line == None)):
+            where = f'''WHERE f.id = {id_departamento}'''
+        elif((id_departamento == None) and (id_line != None)):
+            where = f'''WHERE l.id = {id_line}'''
+            
+        rows = cur.execute(f''' 
+                            SELECT p.id,
+                                    p.n_folha,
+                                    p.nome,
+                                    (l.id) AS id_line,
+                                    (l.desc_line) line,
+                                    (f.id) AS id_departamento,
+                                    (f.descricao) AS departamento,
+                                    (SELECT top 1
+                                            dbo.fn_hora_segundos(ea.hora)
+                                    FROM eventos_acessos ea
+                                    WHERE ea.tipo_acesso = 1
+                                    AND ea.confirmado = 1
+                                    AND ea.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
+                                    AND ea.pessoa_id = p.id
+                                    ORDER BY ea.hora) as hor_entrada
+                            FROM pessoas p
+                            LEFT JOIN pessoas_adicionais pa
+                                ON p.id = pa.pessoa_id
+                            LEFT JOIN lines l
+                                ON l.id = pa.line
+                            INNER JOIN filtro2 f
+                                ON P.filtro2_id = f.id
+                            {where}
+                            ORDER BY p.nome;
+                    ''').fetchall()
+        cur.close()
+        del cur
+        con.close()
+        return rows
+    
     def get_locals(self):
         con = self.connection()
         cur = con.cursor()
@@ -184,6 +228,12 @@ class AccessDTO:
         return rows
 
 if __name__ == '__main__':
-    s = AccessDTO()
+    config = {
+        "server": "10.58.65.21",
+        "database": "SecullumAcesso",
+        "username": "sa",
+        "password": "totalseg_1"
+    }
+    s = AccessDTO(config=config)
     # s.get_access_today('RECEPCAO')
-    s.get_total_access_by_local_today()
+    s.get_absents(95, None)

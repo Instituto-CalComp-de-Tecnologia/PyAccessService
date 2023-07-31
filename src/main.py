@@ -74,6 +74,27 @@ def get_present_people_by_local(local: str):
             'message': 'Error on list access: ' + str(err),
             'data': []
         }
+
+@app.route("/getabsents", methods=['POST'])
+@cross_origin()
+def get_absents():
+    try:
+        type_period = request.json["type_period"]
+        id_departamento = request.json["id_departamento"]
+        id_line = request.json["id_line"]
+        
+        data = access_service.get_absents(id_departamento=id_departamento, id_line=id_line, type_period=type_period)
+        return {
+            'status': True,
+            'message': 'Absents successfully listed.',
+            'data': data
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error login user: ' + str(err),
+            'data': []
+        }
 # -----------------------------------------------------------------------------------------
 
 # ROTAS USER ------------------------------------------------------------------------------

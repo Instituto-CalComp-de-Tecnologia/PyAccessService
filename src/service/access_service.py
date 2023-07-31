@@ -1,4 +1,8 @@
 from database.access_dto import AccessDTO
+import copy
+import datetime
+
+HOUR_ENT = datetime.datetime(2009, 12, 2, 7, 45, 0)
 
 class AccessService:
     def __init__(self, config) -> None:
@@ -73,3 +77,36 @@ class AccessService:
                 data_return[row[3]] += 1
         
         return data_return
+    
+    def get_absents(self, id_departamento, id_line, type_period):
+        
+        if(type_period == 'D'):
+            absents_rows = self.db.get_absents(id_departamento=id_departamento, id_line=id_line)
+            
+            data_return = []
+            data = {}
+            for absent in absents_rows:
+                if(absent.hor_entrada != None):
+                    str_time = absent.hor_entrada.split(':')
+                    access_ent = datetime.datetime(2009, 12, 2, int(str_time[0]), int(str_time[1]), int(str_time[2]))
+                    if(access_ent > HOUR_ENT):
+                        data['id'] = absent.id
+                        data['n_folha'] = absent.n_folha
+                        data['nome'] = absent.nome
+                        data['id_line'] = absent.id_line
+                        data['line'] = absent.line
+                        data['id_departamento'] = absent.id_departamento
+                        data['departamento'] = absent.departamento
+                        data['hor_entrada'] = absent.hor_entrada
+                        data_return.append(copy.copy(data))
+                else:
+                    data['id'] = absent.id
+                    data['n_folha'] = absent.n_folha
+                    data['nome'] = absent.nome
+                    data['id_line'] = absent.id_line
+                    data['line'] = absent.line
+                    data['id_departamento'] = absent.id_departamento
+                    data['departamento'] = absent.departamento
+                    data['hor_entrada'] = absent.hor_entrada
+                    data_return.append(copy.copy(data))
+            return data_return
