@@ -82,8 +82,13 @@ def get_absents():
         type_period = request.json["type_period"]
         id_departamento = request.json["id_departamento"]
         id_line = request.json["id_line"]
+        start_date = None
+        final_date = None
+        if(("start_date" in request.json) and ("final_date" in request.json)):
+            start_date = request.json["start_date"]
+            final_date = request.json["final_date"]
         
-        data = access_service.get_absents(id_departamento=id_departamento, id_line=id_line, type_period=type_period)
+        data = access_service.get_absents(id_departamento=id_departamento, id_line=id_line, type_period=type_period, start_date=start_date, final_date=final_date)
         return {
             'status': True,
             'message': 'Absents successfully listed.',
@@ -92,7 +97,7 @@ def get_absents():
     except Exception as err:
         return {
             'status': False,
-            'message': 'Error login user: ' + str(err),
+            'message': 'Error on list absents: ' + str(err),
             'data': []
         }
 # -----------------------------------------------------------------------------------------

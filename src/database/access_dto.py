@@ -201,6 +201,74 @@ class AccessDTO:
         con.close()
         return rows
     
+    def get_entrances_by_date(self, id_pessoa, type_period, init_date, end_date):
+        if(type_period == "W"):
+            con = self.connection()
+            cur = con.cursor()
+            rows = cur.execute(f''' 
+                               SELECT (CASE
+                                        WHEN DATEPART(WEEKDAY, foo.date_compare) = 1 THEN 'Sun'
+                                        WHEN DATEPART(WEEKDAY, foo.date_compare) = 2 THEN 'Mon'
+                                        WHEN DATEPART(WEEKDAY, foo.date_compare) = 3 THEN 'Tue'
+                                        WHEN DATEPART(WEEKDAY, foo.date_compare) = 4 THEN 'Wed'
+                                        WHEN DATEPART(WEEKDAY, foo.date_compare) = 5 THEN 'Thu'
+                                        WHEN DATEPART(WEEKDAY, foo.date_compare) = 6 THEN 'Fri'
+                                        WHEN DATEPART(WEEKDAY, foo.date_compare) = 7 THEN 'Sat'
+                                       END) AS week_day,
+                                       foo.date_compare,
+                                      (SELECT TOP 1 dbo.fn_hora_segundos(ea.hora)
+                                       FROM eventos_acessos ea
+                                       WHERE ea.tipo_acesso = 1
+                                         AND ea.confirmado = 1
+                                         AND ea.pessoa_id = {id_pessoa}
+                                         AND ea.data = foo.date_compare
+                                       ORDER BY ea.hora) as hor_access
+                                FROM(
+                                    SELECT DATEADD(DAY,value, FORMAT(GETDATE(), 'yyyy-MM-dd 00:00:00.000')) AS date_compare
+                                    FROM dbo.GENERATE_SERIES(0, -6, -1)) AS foo
+                                WHERE DATEPART(WEEKDAY, foo.date_compare) NOT IN(1, 7)
+                                ORDER BY foo.date_compare DESC;
+                        ''').fetchall()
+            cur.close()
+            del cur
+            con.close()
+            return rows
+            
+        if(type_period == "P"):
+            con = self.connection()
+            cur = con.cursor()
+            rows = cur.execute(f''' 
+                                SELECT(CASE
+                                        WHEN DATEPART(WEEKDAY, foo2.date_compare) = 1 THEN 'Sun'
+                                        WHEN DATEPART(WEEKDAY, foo2.date_compare) = 2 THEN 'Mon'
+                                        WHEN DATEPART(WEEKDAY, foo2.date_compare) = 3 THEN 'Tue'
+                                        WHEN DATEPART(WEEKDAY, foo2.date_compare) = 4 THEN 'Wed'
+                                        WHEN DATEPART(WEEKDAY, foo2.date_compare) = 5 THEN 'Thu'
+                                        WHEN DATEPART(WEEKDAY, foo2.date_compare) = 6 THEN 'Fri'
+                                        WHEN DATEPART(WEEKDAY, foo2.date_compare) = 7 THEN 'Sat'
+                                        END) AS week_day,
+                                        foo2.date_compare,
+                                    (SELECT TOP 1 dbo.fn_hora_segundos(ea.hora)
+                                    FROM eventos_acessos ea
+                                    WHERE ea.tipo_acesso = 1
+                                        AND ea.confirmado = 1
+                                        AND ea.pessoa_id = {id_pessoa}
+                                        AND ea.data = foo2.date_compare
+                                    ORDER BY ea.hora) as hor_access
+                                FROM(
+                                SELECT DATEADD(DAY, foo.value, '{init_date}') AS date_compare
+                                FROM(
+                                    SELECT value
+                                    FROM dbo.GENERATE_SERIES(1, 300, 1)) AS foo
+                                WHERE foo.value <= DATEDIFF(DAY, '{init_date}', '{end_date}')) AS foo2
+                                WHERE DATEPART(WEEKDAY, foo2.date_compare) NOT IN(1, 7)
+                                ORDER BY foo2.date_compare DESC;
+                        ''').fetchall()
+            cur.close()
+            del cur
+            con.close()
+            return rows
+    
     def get_locals(self):
         con = self.connection()
         cur = con.cursor()

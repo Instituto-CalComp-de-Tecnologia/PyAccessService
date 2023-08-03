@@ -78,7 +78,7 @@ class AccessService:
         
         return data_return
     
-    def get_absents(self, id_departamento, id_line, type_period):
+    def get_absents(self, id_departamento, id_line, type_period, start_date, final_date):
         
         if(type_period == 'D'):
             absents_rows = self.db.get_absents(id_departamento=id_departamento, id_line=id_line)
@@ -109,4 +109,80 @@ class AccessService:
                     data['departamento'] = absent.departamento
                     data['hor_entrada'] = absent.hor_entrada
                     data_return.append(copy.copy(data))
+            return data_return
+        
+        if(type_period == 'W'):
+            absents_rows = self.db.get_absents(id_departamento=id_departamento, id_line=id_line)
+            data_return = []
+            data = {}
+            
+            for absent in absents_rows:
+                entrances = self.db.get_entrances_by_date(absent.id, 'W', None, None)
+                access = []
+                for entrance in entrances:
+                    if(entrance.hor_access != None):
+                        str_time = entrance.hor_access.split(':')
+                        access_ent = datetime.datetime(2009, 12, 2, int(str_time[0]), int(str_time[1]), int(str_time[2]))
+                        if(access_ent > HOUR_ENT):
+                            ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': entrance.hor_access
+                            }
+                            access.append(ent)
+                    else:
+                        ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': None
+                            }
+                        access.append(ent) 
+                data['id'] = absent.id
+                data['n_folha'] = absent.n_folha
+                data['nome'] = absent.nome
+                data['id_line'] = absent.id_line
+                data['line'] = absent.line
+                data['id_departamento'] = absent.id_departamento
+                data['departamento'] = absent.departamento
+                data['hor_entrada'] = absent.hor_entrada
+                data['access'] = access
+                data_return.append(copy.copy(data))
+            return data_return
+        
+        if(type_period == 'P'):
+            absents_rows = self.db.get_absents(id_departamento=id_departamento, id_line=id_line)
+            data_return = []
+            data = {}
+            
+            for absent in absents_rows:
+                entrances = self.db.get_entrances_by_date(absent.id, 'P', init_date=start_date, end_date=final_date)
+                access = []
+                for entrance in entrances:
+                    if(entrance.hor_access != None):
+                        str_time = entrance.hor_access.split(':')
+                        access_ent = datetime.datetime(2009, 12, 2, int(str_time[0]), int(str_time[1]), int(str_time[2]))
+                        if(access_ent > HOUR_ENT):
+                            ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': entrance.hor_access
+                            }
+                            access.append(ent)
+                    else:
+                        ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': None
+                            }
+                        access.append(ent) 
+                data['id'] = absent.id
+                data['n_folha'] = absent.n_folha
+                data['nome'] = absent.nome
+                data['id_line'] = absent.id_line
+                data['line'] = absent.line
+                data['id_departamento'] = absent.id_departamento
+                data['departamento'] = absent.departamento
+                data['hor_entrada'] = absent.hor_entrada
+                data['access'] = access
+                data_return.append(copy.copy(data))
             return data_return
