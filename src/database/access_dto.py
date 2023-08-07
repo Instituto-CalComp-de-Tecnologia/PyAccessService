@@ -27,35 +27,40 @@ class AccessDTO:
         con = self.connection()
         cur = con.cursor()
         rows = cur.execute(f'''
-                    SELECT a.id,
-                           a.data,
-                           dbo.fn_hora_segundos(a.hora) hora,
-                           p.n_folha,
-                           p.nome,
-                           CASE a.tipo_acesso
-                            WHEN 0 THEN 'R'
-                            WHEN 1 THEN 'E'
-                            WHEN 2 THEN 'S'
-                           END AS tipo_acessos,
-                           e.descricao,
-                           b.descricao,
-                           c.descricao,
-                           f.descricao
-                    FROM eventos_acessos a
-                    INNER JOIN pessoas p
-                        ON a.pessoa_id = p.id
-                        INNER JOIN classificacoes c
-	                        ON p.classificacao_id = c.id
-                    INNER JOIN equipamentos e
-                        ON a.equipamento_id = e.id
-                    LEFT JOIN ambientes b
-                        ON e.ambiente_id = b.id
-                    LEFT JOIN filtro2 f
-                        ON p.filtro2_id = f.id
-                    WHERE a.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
-                    AND b.descricao = '{local}'
-                    AND a.confirmado = 1
-                    ORDER BY a.hora DESC;
+                            SELECT a.id,
+                                    a.data,
+                                    dbo.fn_hora_segundos(a.hora) hora,
+                                    p.n_folha,
+                                    p.nome,
+                                    CASE a.tipo_acesso
+                                    WHEN 0 THEN 'R'
+                                    WHEN 1 THEN 'E'
+                                    WHEN 2 THEN 'S'
+                                    END AS tipo_acessos,
+                                    e.descricao,
+                                    b.descricao,
+                                    c.descricao,
+                                    f.descricao,
+                                    l.desc_line
+                            FROM eventos_acessos a
+                            INNER JOIN pessoas p
+                                ON a.pessoa_id = p.id
+                                INNER JOIN classificacoes c
+                                    ON p.classificacao_id = c.id
+                            INNER JOIN equipamentos e
+                                ON a.equipamento_id = e.id
+                            LEFT JOIN ambientes b
+                                ON e.ambiente_id = b.id
+                            LEFT JOIN filtro2 f
+                                ON p.filtro2_id = f.id
+                            LEFT JOIN pessoas_adicionais pa
+                                ON p.id = pa.pessoa_id
+                            LEFT JOIN lines l
+                                ON l.id = pa.line
+                            WHERE a.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
+                            AND b.descricao = '{local}'
+                            AND a.confirmado = 1
+                            ORDER BY a.hora DESC;
                     ''').fetchall()
         cur.close()
         del cur
@@ -117,40 +122,45 @@ class AccessDTO:
         con = self.connection()
         cur = con.cursor()
         rows = cur.execute(f'''  
-                    SELECT p.id,
-                           p.n_folha,
-                           p.nome,
-                           c.descricao,
-                           foo.descricao,
-                           f.descricao
-                    FROM pessoas p
-                    INNER JOIN (
-                                SELECT ea.pessoa_id,
-				                       a.descricao,
-				                       MAX(ea.hora) AS hora
-			                    FROM eventos_acessos ea
-			                    INNER JOIN equipamentos e
-				                    ON ea.equipamento_id = e.id
-			                    INNER JOIN ambientes a
-				                    ON e.ambiente_id = a.id
-			                    WHERE ea.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
-                                  AND ea.confirmado = 1
-			                      AND ea.tipo_acesso = 1
-			                      AND NOT EXISTS (SELECT ea2.pessoa_id
-							                      FROM eventos_acessos ea2
-							                      WHERE ea2.pessoa_id = ea.pessoa_id
-								                    AND ea2.confirmado = 1
-								                    AND ea2.tipo_acesso = 2
-								                    AND ea2.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
-								                    AND ea2.hora > ea.hora)
-			                    GROUP BY ea.pessoa_id, a.descricao) AS foo
-                        ON p.id = foo.pessoa_id
-                    INNER JOIN classificacoes c
-                        ON c.id = p.classificacao_id
-                    LEFT JOIN filtro2 f
-                        ON p.filtro2_id = f.id
-                    WHERE foo.descricao = '{local}'
-                    ORDER BY p.nome;
+                            SELECT p.id,
+                                    p.n_folha,
+                                    p.nome,
+                                    c.descricao,
+                                    foo.descricao,
+                                    f.descricao,
+                                    l.desc_line
+                            FROM pessoas p
+                            INNER JOIN (
+                                        SELECT ea.pessoa_id,
+                                                a.descricao,
+                                                MAX(ea.hora) AS hora
+                                        FROM eventos_acessos ea
+                                        INNER JOIN equipamentos e
+                                            ON ea.equipamento_id = e.id
+                                        INNER JOIN ambientes a
+                                            ON e.ambiente_id = a.id
+                                        WHERE ea.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
+                                            AND ea.confirmado = 1
+                                            AND ea.tipo_acesso = 1
+                                            AND NOT EXISTS (SELECT ea2.pessoa_id
+                                                            FROM eventos_acessos ea2
+                                                            WHERE ea2.pessoa_id = ea.pessoa_id
+                                                            AND ea2.confirmado = 1
+                                                            AND ea2.tipo_acesso = 2
+                                                            AND ea2.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
+                                                            AND ea2.hora > ea.hora)
+                                        GROUP BY ea.pessoa_id, a.descricao) AS foo
+                                ON p.id = foo.pessoa_id
+                            INNER JOIN classificacoes c
+                                ON c.id = p.classificacao_id
+                            LEFT JOIN filtro2 f
+                                ON p.filtro2_id = f.id
+                            LEFT JOIN pessoas_adicionais pa
+                                ON p.id = pa.pessoa_id
+                            LEFT JOIN lines l
+                                ON l.id = pa.line
+                            WHERE foo.descricao = '{local}'
+                            ORDER BY p.nome;
                     ''').fetchall()
         cur.close()
         del cur
@@ -185,7 +195,8 @@ class AccessDTO:
                                     AND ea.confirmado = 1
                                     AND ea.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
                                     AND ea.pessoa_id = p.id
-                                    ORDER BY ea.hora) as hor_entrada
+                                    ORDER BY ea.hora) as hor_entrada,
+                                    (f3.descricao) as desc_turno
                             FROM pessoas p
                             LEFT JOIN pessoas_adicionais pa
                                 ON p.id = pa.pessoa_id
@@ -193,6 +204,8 @@ class AccessDTO:
                                 ON l.id = pa.line
                             INNER JOIN filtro2 f
                                 ON P.filtro2_id = f.id
+                            LEFT JOIN filtro3 f3
+                                ON p.filtro3_id = f3.id
                             {where}
                             ORDER BY p.nome;
                     ''').fetchall()

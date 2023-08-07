@@ -30,7 +30,8 @@ class AccessService:
                     'register': row[3],
                     'equipament': row[6],
                     'orientarion': row[5],
-                    'department': row[9]
+                    'department': row[9],
+                    'line': row.desc_line
                 })
                 
                 if(row[5] == 'E'):
@@ -45,7 +46,8 @@ class AccessService:
                     'register': row[3],
                     'equipament': row[6],
                     'orientarion': row[5],
-                    'department': row[9]
+                    'department': row[9],
+                    'line': row.desc_line
                 })
                 if(row[5] == 'E'):
                     data_return[row[8]]['total_e'] += 1
@@ -68,7 +70,8 @@ class AccessService:
                 'register': row[1],
                 'name': row[2],
                 'classification': row[3],
-                'department': row[5]
+                'department': row[5],
+                'line': row.desc_line
             })
             
             if(row[3] not in data_return):
@@ -98,6 +101,7 @@ class AccessService:
                         data['id_departamento'] = absent.id_departamento
                         data['departamento'] = absent.departamento
                         data['hor_entrada'] = absent.hor_entrada
+                        data['desc_turno'] = absent.desc_turno
                         data_return.append(copy.copy(data))
                 else:
                     data['id'] = absent.id
@@ -108,6 +112,7 @@ class AccessService:
                     data['id_departamento'] = absent.id_departamento
                     data['departamento'] = absent.departamento
                     data['hor_entrada'] = absent.hor_entrada
+                    data['desc_turno'] = absent.desc_turno
                     data_return.append(copy.copy(data))
             return data_return
         
@@ -145,6 +150,7 @@ class AccessService:
                 data['id_departamento'] = absent.id_departamento
                 data['departamento'] = absent.departamento
                 data['hor_entrada'] = absent.hor_entrada
+                data['desc_turno'] = absent.desc_turno
                 data['access'] = access
                 data_return.append(copy.copy(data))
             return data_return
@@ -183,6 +189,7 @@ class AccessService:
                 data['id_departamento'] = absent.id_departamento
                 data['departamento'] = absent.departamento
                 data['hor_entrada'] = absent.hor_entrada
+                data['desc_turno'] = absent.desc_turno
                 data['access'] = access
                 data_return.append(copy.copy(data))
             return data_return
