@@ -2,7 +2,10 @@ from database.access_dto import AccessDTO
 import copy
 import datetime
 
-HOUR_ENT = datetime.datetime(2009, 12, 2, 7, 45, 0)
+HOUR_ENT_T1 = datetime.datetime(2009, 12, 2, 7, 45, 0)
+HOUR_ENT_T2 = datetime.datetime(2009, 12, 2, 17, 33, 0)
+HOUR_ENT_T3 = datetime.datetime(2009, 12, 2, 0, 0, 0)
+HOUR_ENT_TRAINEE = datetime.datetime(2009, 12, 2, 7, 45, 0)
 
 class AccessService:
     def __init__(self, config) -> None:
@@ -92,7 +95,29 @@ class AccessService:
                 if(absent.hor_entrada != None):
                     str_time = absent.hor_entrada.split(':')
                     access_ent = datetime.datetime(2009, 12, 2, int(str_time[0]), int(str_time[1]), int(str_time[2]))
-                    if(access_ent > HOUR_ENT):
+                    if(('TURNO-07:45' in absent.desc_turno) and (access_ent > HOUR_ENT_T1)):
+                        data['id'] = absent.id
+                        data['n_folha'] = absent.n_folha
+                        data['nome'] = absent.nome
+                        data['id_line'] = absent.id_line
+                        data['line'] = absent.line
+                        data['id_departamento'] = absent.id_departamento
+                        data['departamento'] = absent.departamento
+                        data['hor_entrada'] = absent.hor_entrada
+                        data['desc_turno'] = absent.desc_turno
+                        data_return.append(copy.copy(data))
+                    elif(('TURNO-17:33' in absent.desc_turno) and (access_ent > HOUR_ENT_T2)):
+                        data['id'] = absent.id
+                        data['n_folha'] = absent.n_folha
+                        data['nome'] = absent.nome
+                        data['id_line'] = absent.id_line
+                        data['line'] = absent.line
+                        data['id_departamento'] = absent.id_departamento
+                        data['departamento'] = absent.departamento
+                        data['hor_entrada'] = absent.hor_entrada
+                        data['desc_turno'] = absent.desc_turno
+                        data_return.append(copy.copy(data))
+                    elif(('TURNO-00:00' in absent.desc_turno) and (access_ent > HOUR_ENT_T3)):
                         data['id'] = absent.id
                         data['n_folha'] = absent.n_folha
                         data['nome'] = absent.nome
@@ -128,7 +153,21 @@ class AccessService:
                     if(entrance.hor_access != None):
                         str_time = entrance.hor_access.split(':')
                         access_ent = datetime.datetime(2009, 12, 2, int(str_time[0]), int(str_time[1]), int(str_time[2]))
-                        if(access_ent > HOUR_ENT):
+                        if(('TURNO-07:45' in absent.desc_turno) and (access_ent > HOUR_ENT_T1)):
+                            ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': entrance.hor_access
+                            }
+                            access.append(ent)
+                        elif(('TURNO-17:33' in absent.desc_turno) and (access_ent > HOUR_ENT_T2)):
+                            ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': entrance.hor_access
+                            }
+                            access.append(ent)
+                        elif(('TURNO-00:00' in absent.desc_turno) and (access_ent > HOUR_ENT_T3)):
                             ent = {
                                 'data': entrance.date_compare.strftime('%d/%m/%Y'),
                                 'week_day': entrance.week_day,
@@ -167,7 +206,21 @@ class AccessService:
                     if(entrance.hor_access != None):
                         str_time = entrance.hor_access.split(':')
                         access_ent = datetime.datetime(2009, 12, 2, int(str_time[0]), int(str_time[1]), int(str_time[2]))
-                        if(access_ent > HOUR_ENT):
+                        if(('TURNO-07:45' in absent.desc_turno) and (access_ent > HOUR_ENT_T1)):
+                            ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': entrance.hor_access
+                            }
+                            access.append(ent)
+                        elif(('TURNO-17:33' in absent.desc_turno) and (access_ent > HOUR_ENT_T2)):
+                            ent = {
+                                'data': entrance.date_compare.strftime('%d/%m/%Y'),
+                                'week_day': entrance.week_day,
+                                'hor_access': entrance.hor_access
+                            }
+                            access.append(ent)
+                        elif(('TURNO-00:00' in absent.desc_turno) and (access_ent > HOUR_ENT_T3)):
                             ent = {
                                 'data': entrance.date_compare.strftime('%d/%m/%Y'),
                                 'week_day': entrance.week_day,

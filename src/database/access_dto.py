@@ -196,7 +196,9 @@ class AccessDTO:
                                     AND ea.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
                                     AND ea.pessoa_id = p.id
                                     ORDER BY ea.hora) as hor_entrada,
-                                    (f3.descricao) as desc_turno
+                                    (CASE WHEN f3.descricao IS NULL
+									THEN ''
+									ELSE f3.descricao END) as desc_turno
                             FROM pessoas p
                             LEFT JOIN pessoas_adicionais pa
                                 ON p.id = pa.pessoa_id

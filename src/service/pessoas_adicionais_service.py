@@ -15,15 +15,18 @@ class PessoasAdicionaisService:
             data['nome'] = person.nome
             data['line'] = person.line
             data['departamento'] = person.departamento
+            data['turno'] = person.turno
             data_return.append(copy.copy(data))
         return data_return
     
-    def update_pessoa(self, pessoa_id, id_departamento, id_line):
+    def update_pessoa(self, pessoa_id, id_departamento, id_line, id_turno):
         try:
             if(id_departamento):
                 self.pessoasAdicionaisDTO.update_departamento(pessoa_id=pessoa_id, id_departamento=id_departamento)
             if(id_line):
                 self.pessoasAdicionaisDTO.update_line(pessoa_id=pessoa_id, id_line=id_line)
+            if(id_turno):
+                self.pessoasAdicionaisDTO.update_turno(pessoa_id=pessoa_id, id_turno=id_turno)
             
             return {
                 'status': False,

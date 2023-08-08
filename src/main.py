@@ -6,6 +6,7 @@ from service.user_service import UserService
 from service.pessoas_adicionais_service import PessoasAdicionaisService
 from service.departamento_service import DepartamentoService
 from service.lines_service import LinesService
+from service.turno_service import TurnoService
 import json
 
 # LEITURA DAS CONFIGURAÇÕES
@@ -22,6 +23,7 @@ user_service = UserService(config)
 pessoas_service = PessoasAdicionaisService(config)
 departamento_service = DepartamentoService(config)
 lines_service = LinesService(config)
+turno_service = TurnoService(config)
 
 # ROTAS ACCESS ------------------------------------------------------------------------------
 @app.route("/getaccess/<local>", methods=['GET'])
@@ -158,8 +160,9 @@ def pessoas_update():
         pessoa_id = request.json["pessoa_id"]
         id_departamento = request.json["id_departamento"]
         id_line = request.json["id_line"]
+        id_turno = request.json["id_turno"]
         
-        data = pessoas_service.update_pessoa(pessoa_id=pessoa_id, id_departamento=id_departamento, id_line=id_line)
+        data = pessoas_service.update_pessoa(pessoa_id=pessoa_id, id_departamento=id_departamento, id_line=id_line, id_turno=id_turno)
         return {
             'status': True,
             'message': 'Pessoas successfully updated.',
@@ -188,6 +191,25 @@ def departamento_get_all():
         return {
             'status': False,
             'message': 'Error on list departamento: ' + str(err),
+            'data': []
+        }
+# -------------------------------------------------------------------------------------------------------
+
+# ROTAS DEPARTAMENTOS  ------------------------------------------------------------------------------
+@app.route("/turno/getall", methods=['GET'])
+@cross_origin()
+def turno_get_all():
+    try:
+        data = turno_service.get_all()
+        return {
+            'status': True,
+            'message': 'Turno successfully listed.',
+            'data': data
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error on list turno: ' + str(err),
             'data': []
         }
 # -------------------------------------------------------------------------------------------------------

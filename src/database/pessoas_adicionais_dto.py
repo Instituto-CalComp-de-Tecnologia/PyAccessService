@@ -26,7 +26,8 @@ class PessoasAdicionaisDTO:
                                       p.n_folha,
                                       p.nome,
                                       (l.desc_line) line,
-                                      (f.descricao) AS departamento
+                                      (f.descricao) AS departamento,
+									  (f3.descricao) AS turno
                                 FROM pessoas p
                                 LEFT JOIN pessoas_adicionais pa
                                     ON p.id = pa.pessoa_id
@@ -34,6 +35,8 @@ class PessoasAdicionaisDTO:
                                     ON l.id = pa.line
                                 INNER JOIN filtro2 f
                                     ON P.filtro2_id = f.id
+								LEFT JOIN filtro3 f3
+									ON f3.id = p.filtro3_id
                                 ORDER BY p.nome;
                                ''').fetchall()
             cur.close()
@@ -51,6 +54,37 @@ class PessoasAdicionaisDTO:
             cur.execute(f'''
                         UPDATE pessoas
                         SET filtro2_id = {id_departamento}
+                        WHERE id = {pessoa_id};
+                        ''')
+            con.commit()
+            
+            cur.close()
+            del cur
+            con.close()
+            return {
+                'status': True,
+                'message': 'Departamento successfully updated.',
+                'data': []
+            }
+        except Exception as err:
+            print(f"Error on insert user: {err}")
+            cur.close()
+            del cur
+            con.close()
+            return {
+                'status': False,
+                'message': f'Error on update departamento: {str(err)}',
+                'data': []
+            }
+            
+    def update_turno(self, pessoa_id, id_turno):
+        con = self.connection()
+        cur = con.cursor()
+        
+        try:
+            cur.execute(f'''
+                        UPDATE pessoas
+                        SET filtro3_id = {id_turno}
                         WHERE id = {pessoa_id};
                         ''')
             con.commit()
