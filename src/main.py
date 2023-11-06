@@ -102,6 +102,28 @@ def get_absents():
             'message': 'Error on list absents: ' + str(err),
             'data': []
         }
+
+@app.route("/getaccess/refectory", methods=['POST'])
+@cross_origin()
+def get_refectory_access_by_date():
+    try:
+        init_date = request.json["init_date"]
+        final_date = request.json["final_date"]
+        shift = request.json["shift"]
+        service = request.json["service"]
+        
+        data = access_service.get_refectory_access_by_date(init_date=init_date, final_date=final_date, shift=shift, service=service)
+        return {
+            'status': True,
+            'message': 'Access successfully listed.',
+            'data': data
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error on list access: ' + str(err),
+            'data': []
+        }
 # -----------------------------------------------------------------------------------------
 
 # ROTAS USER ------------------------------------------------------------------------------

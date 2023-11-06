@@ -65,9 +65,21 @@ class UserDTO:
             del cur
             con.close()
             if(len(rows) > 0):
-                return True
+                if("refeitorio" in rows[0].user_name):
+                    return {
+                        'status': True,
+                        'UserRefectory': True
+                    }
+                else:
+                    return {
+                        'status': True,
+                        'UserRefectory': False
+                    }
             else:
-                return False
+                return {
+                        'status': False,
+                        'UserRefectory': False
+                    }
         except Exception as err:
             print(f"Error on login user: {err}")
 
@@ -81,5 +93,4 @@ if __name__ == '__main__':
     
     u = UserDTO(config=config)
     
-    # u.create('Michel Vander', '123')
-    print(u.login('1234'))
+    print(u.login(password='Refeitorio@1'))

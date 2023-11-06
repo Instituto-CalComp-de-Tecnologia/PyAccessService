@@ -246,3 +246,20 @@ class AccessService:
                 data['access'] = access
                 data_return.append(copy.copy(data))
             return data_return
+    
+    def get_refectory_access_by_date(self, init_date, final_date, shift, service: str):
+        data_return = []
+        access_rows = self.db.get_refectory_access_by_date(init_date=init_date, final_date=final_date, shift=shift, service=service)
+        data = {}
+        
+        for access in access_rows:
+            data['id_pessoa'] = access.id_pessoa
+            data['n_folha'] = access.n_folha
+            data['name'] = access.nome
+            data['classificacao'] = access.classificacao
+            data['departamento'] = access.departamento
+            data['turno'] = access.turno
+            data['desc_line'] = access.desc_line
+            data['qtd_acessos'] = access.qtd_acessos
+            data_return.append(copy.copy(data))
+        return data_return

@@ -10,11 +10,13 @@ class UserService:
     
     def login(self, password: str):
         data = self.userDTO.login(password=password)
-        if(data):
+        if(data['status']):
             return {
                 'status': True,
                 'message': f'User successfully logged',
-                'data': []
+                'data': {
+                    'UserRefectory': data['UserRefectory']
+                }
             }
         else:
             return {

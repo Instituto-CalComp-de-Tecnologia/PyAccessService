@@ -60,6 +60,7 @@ class AccessDTO:
                             WHERE a.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
                             AND b.descricao = '{local}'
                             AND a.confirmado = 1
+                            AND a.negado = 0
                             ORDER BY a.hora DESC;
                     ''').fetchall()
         cur.close()
@@ -284,6 +285,76 @@ class AccessDTO:
             con.close()
             return rows
     
+    def get_refectory_access_by_date(self, init_date, final_date, shift, service: str):
+        # list_turnos = ', '.join(str(turno) for turno in shift)
+        
+        #CAFÉ DA MANHÃ
+        if(service.lower() == 'b'):
+            where = 'AND (a.hora >= 19800 AND a.hora <= 32400)'
+        
+        #CAFÉ DA MANHÃ - GESTANTES
+        if(service.lower() == 'p'):
+            where = 'AND ((a.hora >= 34200 AND a.hora <= 3600) OR (a.hora >= 55800 AND a.hora <= 57600))'
+        
+        #ALMOÇO
+        if(service.lower() == 'l'):
+            where = 'AND (a.hora >= 39600 AND a.hora <= 50400)'
+        
+        #JANTA
+        if(service.lower() == 'd'):
+            where = 'AND (a.hora >= 72000 AND a.hora <= 79200)'
+        
+        #CEIA
+        if(service.lower() == 's'):
+            where = 'AND (a.hora >= 3600 AND a.hora <= 5400)'
+        
+        #LANCHE
+        if(service.lower() == 'sn'):
+            where = 'AND ((a.hora >= 59400 AND a.hora <= 64800) OR (a.hora >= 81000 AND a.hora <= 86399) OR (a.hora >= 10800 AND a.hora <= 1200))'
+        
+        con = self.connection()
+        cur = con.cursor()
+        rows = cur.execute(f''' 
+                            SELECT  p.id as id_pessoa,
+                                    p.n_folha,
+                                    p.nome,
+                                    c.descricao AS classificacao,
+                                    f.descricao AS departamento,
+                                    f3.descricao AS turno,
+                                    l.desc_line,
+                                    count(p.id) as qtd_acessos
+                            FROM eventos_acessos a
+                            INNER JOIN pessoas p
+                                ON a.pessoa_id = p.id
+                                INNER JOIN classificacoes c
+                                    ON p.classificacao_id = c.id
+                            INNER JOIN equipamentos e
+                                ON a.equipamento_id = e.id
+                            LEFT JOIN ambientes b
+                                ON e.ambiente_id = b.id
+                            LEFT JOIN filtro2 f
+                                ON p.filtro2_id = f.id
+                            LEFT JOIN filtro3 f3
+                                ON p.filtro3_id = f3.id
+                            LEFT JOIN pessoas_adicionais pa
+                                ON p.id = pa.pessoa_id
+                            LEFT JOIN lines l
+                                ON l.id = pa.line
+                            WHERE (a.data >= FORMAT(convert(DATETIME, '{init_date}'), 'yyyy-MM-dd') AND a.data <= FORMAT(convert(DATETIME, '{final_date}'), 'yyyy-MM-dd'))
+                            AND b.descricao = 'REFECTORY'
+                            AND a.confirmado = 1
+                            AND a.negado = 0
+                            AND a.tipo_acesso = 1
+                            AND p.filtro3_id = ({shift})
+                             {where}
+                            GROUP BY p.id, p.n_folha, p.nome, c.descricao, f.descricao, f3.descricao, l.desc_line
+                            ORDER BY p.nome;
+                    ''').fetchall()
+        cur.close()
+        del cur
+        con.close()
+        return rows
+    
     def get_locals(self):
         con = self.connection()
         cur = con.cursor()
@@ -318,5 +389,4 @@ if __name__ == '__main__':
         "password": "totalseg_1"
     }
     s = AccessDTO(config=config)
-    # s.get_access_today('RECEPCAO')
-    s.get_absents(95, None)
+    s.get_refectory_access_by_date(init_date='10/24/2023', final_date='10/24/2023', shift=1, service='P')

@@ -1,3 +1,7 @@
+'''
+    SCRIPT QUE ATUALIZA O TURNO DE TODOS OS FUNCIONARIOS DO BANCO DE DADOS DO SISTEMA SECULLUM COM BASE NA API DO TOTVS
+'''
+
 import datetime
 import hashlib
 import requests
