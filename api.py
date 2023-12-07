@@ -8,7 +8,7 @@ import requests
 import pyodbc
 
 server = '10.58.65.21'
-database = 'SecullumAcesso'
+database = 'SecullumHomolog'
 username = 'sa'
 password = 'totalseg_1'
 

@@ -263,3 +263,18 @@ class AccessService:
             data['qtd_acessos'] = access.qtd_acessos
             data_return.append(copy.copy(data))
         return data_return
+    
+    def get_exits_by_local_date(self, init_date, final_date, local):
+        data_return = []
+        access_rows = self.db.get_exits_by_local_date(init_date=init_date, final_date=final_date, local=local)
+        data = {}
+        
+        for access in access_rows:
+            data['id'] = access.id
+            data['n_folha'] = access.n_folha
+            data['name'] = access.nome
+            data['department'] = access.department
+            data['shift'] = access.shift
+            data['qtd_saida'] = access.qtd_saida
+            data_return.append(copy.copy(data))
+        return data_return

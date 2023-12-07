@@ -124,6 +124,27 @@ def get_refectory_access_by_date():
             'message': 'Error on list access: ' + str(err),
             'data': []
         }
+
+@app.route("/getaccess/exitsbylocal", methods=['POST'])
+@cross_origin()
+def get_exits_by_local_date():
+    try:
+        init_date = request.json["init_date"]
+        final_date = request.json["final_date"]
+        local = request.json["local"]
+        
+        data = access_service.get_exits_by_local_date(init_date=init_date, final_date=final_date, local=local)
+        return {
+            'status': True,
+            'message': 'Access successfully listed.',
+            'data': data
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error on list access: ' + str(err),
+            'data': []
+        }
 # -----------------------------------------------------------------------------------------
 
 # ROTAS USER ------------------------------------------------------------------------------

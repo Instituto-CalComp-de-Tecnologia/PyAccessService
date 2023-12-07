@@ -355,6 +355,48 @@ class AccessDTO:
         con.close()
         return rows
     
+    def get_exits_by_local_date(self, init_date, final_date, local):
+        con = self.connection()
+        cur = con.cursor()
+        rows = cur.execute(f''' 
+                            SELECT TOP 30 foo.id,
+                                    p2.nome,
+                                    p2.n_folha,
+                                    (f2.descricao) as department,
+                                    (f3.descricao) as shift,
+                                    foo.qtd_saida
+                                FROM pessoas p2
+                                INNER JOIN filtro2 f2
+                                    ON p2.filtro2_id = f2.id
+                                INNER JOIN filtro3 f3
+                                    ON p2.filtro3_id = f3.id
+                                INNER JOIN (
+                                    SELECT  p.id,
+                                            (count(p.id) - DATEDIFF(day, CAST('{init_date}' AS DATE), CAST('{final_date}' AS DATE)) + 1) as qtd_saida
+                                    FROM eventos_acessos a
+                                    INNER JOIN pessoas p
+                                        ON a.pessoa_id = p.id
+                                    INNER JOIN equipamentos e
+                                        ON a.equipamento_id = e.id
+                                    LEFT JOIN ambientes b
+                                        ON e.ambiente_id = b.id
+                                    WHERE (a.data >= FORMAT(convert(DATETIME, '{init_date}'), 'yyyy-MM-dd') AND a.data <= FORMAT(convert(DATETIME, '{final_date}'), 'yyyy-MM-dd'))
+                                    AND b.descricao = '{local}'
+                                    AND a.confirmado = 1
+                                    AND a.negado = 0
+                                    AND tipo_acesso = 2
+                                    AND p.classificacao_id = 2
+                                    GROUP BY p.id
+                                ) AS foo
+                                    ON foo.id = p2.id
+                                WHERE foo.qtd_saida > 0
+                                ORDER BY foo.qtd_saida DESC;
+                    ''').fetchall()
+        cur.close()
+        del cur
+        con.close()
+        return rows
+    
     def get_locals(self):
         con = self.connection()
         cur = con.cursor()
@@ -389,4 +431,4 @@ if __name__ == '__main__':
         "password": "totalseg_1"
     }
     s = AccessDTO(config=config)
-    s.get_refectory_access_by_date(init_date='10/24/2023', final_date='10/24/2023', shift=1, service='P')
+    print(s.get_exits_by_local_date(init_date='12/01/2023', final_date='12/06/2023', local='RECEPCAOF1'))
