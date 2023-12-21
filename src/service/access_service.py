@@ -264,9 +264,9 @@ class AccessService:
             data_return.append(copy.copy(data))
         return data_return
     
-    def get_exits_by_local_date(self, init_date, final_date, local):
+    def get_exits_by_local_date(self, init_date, final_date, local, name: str):
         data_return = []
-        access_rows = self.db.get_exits_by_local_date(init_date=init_date, final_date=final_date, local=local)
+        access_rows = self.db.get_exits_by_local_date(init_date=init_date, final_date=final_date, local=local, name=name)
         data = {}
         
         for access in access_rows:
@@ -276,5 +276,6 @@ class AccessService:
             data['department'] = access.department
             data['shift'] = access.shift
             data['qtd_saida'] = access.qtd_saida
+            data['total_time'] = self.db.get_total_exit_time_by_date(init_date=init_date, final_date=final_date, pessoa_id=access.id, local=local)
             data_return.append(copy.copy(data))
         return data_return

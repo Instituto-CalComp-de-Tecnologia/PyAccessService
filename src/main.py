@@ -132,8 +132,9 @@ def get_exits_by_local_date():
         init_date = request.json["init_date"]
         final_date = request.json["final_date"]
         local = request.json["local"]
+        name = request.json["name"]
         
-        data = access_service.get_exits_by_local_date(init_date=init_date, final_date=final_date, local=local)
+        data = access_service.get_exits_by_local_date(init_date=init_date, final_date=final_date, local=local, name=name)
         return {
             'status': True,
             'message': 'Access successfully listed.',
