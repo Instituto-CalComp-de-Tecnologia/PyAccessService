@@ -1,5 +1,6 @@
 import pyodbc
 import time
+import copy
 
 class AccessDTO:
     def __init__(self, config) -> None:
@@ -199,8 +200,9 @@ class AccessDTO:
                                     AND ea.pessoa_id = p.id
                                     ORDER BY ea.hora) as hor_entrada,
                                     (CASE WHEN f3.descricao IS NULL
-									THEN ''
-									ELSE f3.descricao END) as desc_turno
+                                    THEN ''
+                                    ELSE f3.descricao END) as desc_turno,
+                                    c.descricao as desc_classificacao
                             FROM pessoas p
                             LEFT JOIN pessoas_adicionais pa
                                 ON p.id = pa.pessoa_id
@@ -210,6 +212,8 @@ class AccessDTO:
                                 ON P.filtro2_id = f.id
                             LEFT JOIN filtro3 f3
                                 ON p.filtro3_id = f3.id
+                            LEFT JOIN classificacoes c
+                                ON c.id = p.classificacao_id 
                             {where}
                             ORDER BY p.nome;
                     ''').fetchall()
@@ -356,6 +360,88 @@ class AccessDTO:
         con.close()
         return rows
     
+    def get_refectory_access_by_date_detail(self, init_date, final_date, shift, service: str, id_pessoa):
+        # list_turnos = ', '.join(str(turno) for turno in shift)
+        
+        #CAFÉ DA MANHÃ
+        if(service.lower() == 'b'):
+            where = 'AND (a.hora >= 19800 AND a.hora <= 32400)'
+        
+        #CAFÉ DA MANHÃ - GESTANTES
+        if(service.lower() == 'p'):
+            where = 'AND ((a.hora >= 34200 AND a.hora <= 3600) OR (a.hora >= 55800 AND a.hora <= 57600))'
+        
+        #ALMOÇO
+        if(service.lower() == 'l'):
+            where = 'AND (a.hora >= 39600 AND a.hora <= 50400)'
+        
+        #JANTA
+        if(service.lower() == 'd'):
+            where = 'AND (a.hora >= 72000 AND a.hora <= 79200)'
+        
+        #CEIA
+        if(service.lower() == 's'):
+            where = 'AND (a.hora >= 3600 AND a.hora <= 5400)'
+        
+        #LANCHE
+        if(service.lower() == 'sn'):
+            where = 'AND ((a.hora >= 59400 AND a.hora <= 64800) OR (a.hora >= 81000 AND a.hora <= 86399) OR (a.hora >= 10800 AND a.hora <= 1200))'
+        
+        con = self.connection()
+        cur = con.cursor()
+        rows = cur.execute(f''' 
+                           SELECT  a.id,
+                                    format(a.data, 'MM/dd/yyyy') as "data",
+                                    CASE a.tipo_acesso
+                                    WHEN 0 THEN 'R'
+                                    WHEN 1 THEN 'ENTRY'
+                                    WHEN 2 THEN 'EXIT'
+                                END AS orientation,
+                                dbo.fn_hora_segundos(a.hora) hour
+                            FROM eventos_acessos a
+                            INNER JOIN pessoas p
+                                ON a.pessoa_id = p.id
+                                INNER JOIN classificacoes c
+                                    ON p.classificacao_id = c.id
+                            INNER JOIN equipamentos e
+                                ON a.equipamento_id = e.id
+                            LEFT JOIN ambientes b
+                                ON e.ambiente_id = b.id
+                            LEFT JOIN filtro2 f
+                                ON p.filtro2_id = f.id
+                            LEFT JOIN filtro3 f3
+                                ON p.filtro3_id = f3.id
+                            LEFT JOIN pessoas_adicionais pa
+                                ON p.id = pa.pessoa_id
+                            LEFT JOIN lines l
+                                ON l.id = pa.line
+                            WHERE (a.data >= FORMAT(convert(DATETIME, '{init_date}'), 'yyyy-MM-dd') AND a.data <= FORMAT(convert(DATETIME, '{final_date}'), 'yyyy-MM-dd'))
+                            AND b.descricao = 'REFECTORY'
+                            AND a.confirmado = 1
+                            AND a.negado = 0
+                            AND a.tipo_acesso = 1
+                            AND p.filtro3_id = ({shift}) 
+                            {where}
+                            AND a.pessoa_id = {id_pessoa}
+                            ORDER BY a.hora DESC;
+                    ''').fetchall()
+        cur.close()
+        del cur
+        con.close()
+        
+        # data_return = [list(row) for row in rows]
+        data_return = []
+        data = {}
+        
+        for row in rows:
+            data['id_access'] = row[0]
+            data['date_access'] = row[1]
+            data['orientation'] = row[2]
+            data['hour'] = row[3]
+            data_return.append(copy.copy(data))
+
+        return data_return
+        
     def get_exits_by_local_date(self, init_date, final_date, local, name: str):
         name = name.upper()
         con = self.connection()

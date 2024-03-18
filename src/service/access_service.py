@@ -105,6 +105,7 @@ class AccessService:
                         data['departamento'] = absent.departamento
                         data['hor_entrada'] = absent.hor_entrada
                         data['desc_turno'] = absent.desc_turno
+                        data['desc_classificacao'] = absent.desc_classificacao
                         data_return.append(copy.copy(data))
                     elif(('TURNO-17:33' in absent.desc_turno) and (access_ent > HOUR_ENT_T2)):
                         data['id'] = absent.id
@@ -116,6 +117,7 @@ class AccessService:
                         data['departamento'] = absent.departamento
                         data['hor_entrada'] = absent.hor_entrada
                         data['desc_turno'] = absent.desc_turno
+                        data['desc_classificacao'] = absent.desc_classificacao
                         data_return.append(copy.copy(data))
                     elif(('TURNO-00:00' in absent.desc_turno) and (access_ent > HOUR_ENT_T3)):
                         data['id'] = absent.id
@@ -127,6 +129,7 @@ class AccessService:
                         data['departamento'] = absent.departamento
                         data['hor_entrada'] = absent.hor_entrada
                         data['desc_turno'] = absent.desc_turno
+                        data['desc_classificacao'] = absent.desc_classificacao
                         data_return.append(copy.copy(data))
                 else:
                     data['id'] = absent.id
@@ -138,6 +141,7 @@ class AccessService:
                     data['departamento'] = absent.departamento
                     data['hor_entrada'] = absent.hor_entrada
                     data['desc_turno'] = absent.desc_turno
+                    data['desc_classificacao'] = absent.desc_classificacao
                     data_return.append(copy.copy(data))
             return data_return
         
@@ -190,6 +194,7 @@ class AccessService:
                 data['departamento'] = absent.departamento
                 data['hor_entrada'] = absent.hor_entrada
                 data['desc_turno'] = absent.desc_turno
+                data['desc_classificacao'] = absent.desc_classificacao
                 data['access'] = access
                 data_return.append(copy.copy(data))
             return data_return
@@ -243,6 +248,7 @@ class AccessService:
                 data['departamento'] = absent.departamento
                 data['hor_entrada'] = absent.hor_entrada
                 data['desc_turno'] = absent.desc_turno
+                data['desc_classificacao'] = absent.desc_classificacao
                 data['access'] = access
                 data_return.append(copy.copy(data))
             return data_return
@@ -261,6 +267,7 @@ class AccessService:
             data['turno'] = access.turno
             data['desc_line'] = access.desc_line
             data['qtd_acessos'] = access.qtd_acessos
+            data['access_detail'] = self.db.get_refectory_access_by_date_detail(init_date=init_date, final_date=final_date, shift=shift, service=service, id_pessoa=access.id_pessoa)
             data_return.append(copy.copy(data))
         return data_return
     
