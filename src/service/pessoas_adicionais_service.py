@@ -16,6 +16,7 @@ class PessoasAdicionaisService:
             data['line'] = person.line
             data['departamento'] = person.departamento
             data['turno'] = person.turno
+            data['classificacao'] = person.classificacao
             data_return.append(copy.copy(data))
         return data_return
     

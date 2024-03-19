@@ -27,7 +27,8 @@ class PessoasAdicionaisDTO:
                                       p.nome,
                                       (l.desc_line) line,
                                       (f.descricao) AS departamento,
-									  (f3.descricao) AS turno
+                                      (f3.descricao) AS turno,
+                                      (c.descricao) AS classificacao
                                 FROM pessoas p
                                 LEFT JOIN pessoas_adicionais pa
                                     ON p.id = pa.pessoa_id
@@ -35,8 +36,10 @@ class PessoasAdicionaisDTO:
                                     ON l.id = pa.line
                                 INNER JOIN filtro2 f
                                     ON P.filtro2_id = f.id
-								LEFT JOIN filtro3 f3
-									ON f3.id = p.filtro3_id
+                                LEFT JOIN filtro3 f3
+                                    ON f3.id = p.filtro3_id
+                                LEFT JOIN classificacoes c
+                                    ON c.id = p.classificacao_id
                                 ORDER BY p.nome;
                                ''').fetchall()
             cur.close()
