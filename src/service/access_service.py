@@ -286,3 +286,20 @@ class AccessService:
             data['total_time'] = self.db.get_total_exit_time_by_date(init_date=init_date, final_date=final_date, pessoa_id=access.id, local=local)
             data_return.append(copy.copy(data))
         return data_return
+    
+    def get_access_f1(self, init_date, final_date):
+        data_return = []
+        access_rows = self.db.get_access_f1(init_date=init_date, final_date=final_date)
+        data = {}
+        
+        for access in access_rows:
+            data['id'] = access.id
+            data['register'] = access.register
+            data['date_access'] = access.date_access
+            data['hour'] = access.hour
+            data['direction'] = access.direction
+            data['equipment'] = access.equipment
+            data['type'] = access.type
+            data['function'] = access.function
+            data_return.append(copy.copy(data))
+        return data_return

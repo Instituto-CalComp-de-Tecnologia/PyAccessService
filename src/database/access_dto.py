@@ -532,6 +532,48 @@ class AccessDTO:
                         break
         return time.strftime("%H:%M:%S", time.gmtime(total))
     
+    def get_access_f1(self, init_date, final_date):
+        con = self.connection()
+        cur = con.cursor()
+        rows = cur.execute(f''' 
+                           SELECT a.id,
+                                  COALESCE(p.n_folha, '') AS register,
+                                  p.nome as Name,
+                                  format(a.data, 'MM/dd/yyyy') as "date_access",
+                                  dbo.fn_hora_segundos(a.hora) hour,
+                                  CASE a.tipo_acesso
+                                        WHEN 0 THEN 'R'
+                                        WHEN 1 THEN 'ENTRY'
+                                        WHEN 2 THEN 'EXIT'
+                                  END AS direction,
+                                  (e.descricao + ' - FACIAL') as equipment,
+                                  c.descricao as type,
+                                  COALESCE(f.descricao, '') as "function"
+                                FROM eventos_acessos a
+                                INNER JOIN pessoas p
+                                    ON a.pessoa_id = p.id
+                                    INNER JOIN classificacoes c
+                                        ON p.classificacao_id = c.id
+                                INNER JOIN equipamentos e
+                                    ON a.equipamento_id = e.id
+                                LEFT JOIN ambientes b
+                                    ON e.ambiente_id = b.id
+                                LEFT JOIN filtro2 f
+                                    ON p.filtro2_id = f.id
+                                LEFT JOIN pessoas_adicionais pa
+                                    ON p.id = pa.pessoa_id
+                                WHERE (a.data >= FORMAT(convert(DATETIME, '{init_date}'), 'yyyy-MM-dd') AND a.data <= FORMAT(convert(DATETIME, '{final_date}'), 'yyyy-MM-dd'))
+                                AND b.descricao = 'RECEPCAOF1'
+                                AND a.confirmado = 1
+                                AND a.negado = 0
+                                GROUP BY a.id, p.n_folha, p.nome, a.data, a.hora, a.tipo_acesso, e.descricao, c.descricao, f.descricao
+                                ORDER BY a.hora DESC;
+                    ''').fetchall()
+        cur.close()
+        del cur
+        con.close()
+        return rows
+    
     def get_locals(self):
         con = self.connection()
         cur = con.cursor()

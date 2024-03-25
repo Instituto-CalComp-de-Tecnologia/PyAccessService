@@ -146,6 +146,26 @@ def get_exits_by_local_date():
             'message': 'Error on list access: ' + str(err),
             'data': []
         }
+
+@app.route("/getaccess/f1", methods=['POST'])
+@cross_origin()
+def get_access_f1():
+    try:
+        init_date = request.json["init_date"]
+        final_date = request.json["final_date"]
+        
+        data = access_service.get_access_f1(init_date=init_date, final_date=final_date)
+        return {
+            'status': True,
+            'message': 'Access successfully listed.',
+            'data': data
+        }
+    except Exception as err:
+        return {
+            'status': False,
+            'message': 'Error on list access: ' + str(err),
+            'data': []
+        }
 # -----------------------------------------------------------------------------------------
 
 # ROTAS USER ------------------------------------------------------------------------------
