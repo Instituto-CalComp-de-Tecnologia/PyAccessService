@@ -61,6 +61,7 @@ class AccessDTO:
                                 ON l.id = pa.line
                             WHERE a.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
                             AND b.descricao = '{local}'
+                            AND a.hora >= 18000
                             AND a.confirmado = 1
                             AND a.negado = 0
                             ORDER BY a.hora DESC;
@@ -608,4 +609,4 @@ if __name__ == '__main__':
         "password": "totalseg_1"
     }
     s = AccessDTO(config=config)
-    print(s.get_total_exit_time_by_date(init_date='12/06/2023', final_date='12/07/2023', pessoa_id=956, local='RECEPCAOF1'))
+    print(s.get_total_access_by_local_today())
