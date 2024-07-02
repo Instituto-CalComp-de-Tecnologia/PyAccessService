@@ -148,12 +148,17 @@ class AccessDTO:
                                             AND ea.tipo_acesso = 1
                                             AND NOT EXISTS (SELECT ea2.pessoa_id
                                                             FROM eventos_acessos ea2
+                                                            INNER JOIN equipamentos e2
+                                                                ON ea2.equipamento_id = e2.id
+                                                            INNER JOIN ambientes a2
+                                                                ON e2.ambiente_id = a2.id
                                                             WHERE ea2.pessoa_id = ea.pessoa_id
                                                             AND ea2.confirmado = 1
                                                             AND ea2.tipo_acesso = 2
                                                             AND ea2.data = FORMAT(GETDATE(), 'yyyy-MM-dd')
+                                                            AND a2.id = a.id
                                                             AND ea2.hora > ea.hora)
-                                        GROUP BY ea.pessoa_id, a.descricao) AS foo
+                                        GROUP BY ea.pessoa_id, a.descricao, ea.hora) AS foo
                                 ON p.id = foo.pessoa_id
                             INNER JOIN classificacoes c
                                 ON c.id = p.classificacao_id
@@ -164,6 +169,13 @@ class AccessDTO:
                             LEFT JOIN lines l
                                 ON l.id = pa.line
                             WHERE foo.descricao = '{local}'
+                            GROUP BY p.id,
+                                    p.n_folha,
+                                    p.nome,
+                                    c.descricao,
+                                    foo.descricao,
+                                    f.descricao,
+                                    l.desc_line
                             ORDER BY p.nome;
                     ''').fetchall()
         cur.close()
